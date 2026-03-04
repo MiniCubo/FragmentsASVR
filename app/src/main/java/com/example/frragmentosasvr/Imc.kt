@@ -5,6 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import org.w3c.dom.Text
+import kotlin.concurrent.timerTask
+import kotlin.math.pow
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -20,6 +25,7 @@ class Imc : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private lateinit var  view : View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +40,19 @@ class Imc : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_imc, container, false)
+        view = inflater.inflate(R.layout.fragment_imc, container, false)
+
+        view.findViewById<Button>(R.id.imc_button).setOnClickListener { task ->
+            val peso = view.findViewById<TextView>(R.id.peso).text.toString()
+            val altura = view.findViewById<TextView>(R.id.altura).text.toString()
+            val resultadoText = view.findViewById<TextView>(R.id.calculation)
+
+            val resultado = peso.toDouble() / (altura.toDouble().pow(2.0))
+            resultadoText.text = resultado.toString()
+        }
+
+
+        return view
     }
 
     companion object {

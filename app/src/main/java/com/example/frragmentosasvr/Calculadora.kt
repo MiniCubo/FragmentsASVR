@@ -6,62 +6,118 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [Calculadora.newInstance] factory method to
- * create an instance of this fragment.
- */
 class Calculadora : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var pantalla: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view : View = inflater.inflate(R.layout.fragment_calculadora, container, false)
-        val mensaje = view.findViewById<Button>(R.id.mensaje)
+    ): View {
 
-        mensaje.setOnClickListener { task ->
-            Toast.makeText(view.context, "Funciona en calculadora", Toast.LENGTH_SHORT).show()
-        }
+        val view = inflater.inflate(R.layout.fragment_calculadora, container, false)
+
+        pantalla = view.findViewById(R.id.pantalla)
+
+        view.findViewById<Button>(R.id.suma).setOnClickListener { sum() }
+        view.findViewById<Button>(R.id.menos).setOnClickListener { sub() }
+        view.findViewById<Button>(R.id.mult).setOnClickListener { mult() }
+        view.findViewById<Button>(R.id.div).setOnClickListener { div() }
+        view.findViewById<Button>(R.id.buttone).setOnClickListener { calculate() }
+
+        view.findViewById<Button>(R.id.button1).setOnClickListener { addExpresion("1") }
+        view.findViewById<Button>(R.id.button2).setOnClickListener { addExpresion("2") }
+        view.findViewById<Button>(R.id.button3).setOnClickListener { addExpresion("3") }
+        view.findViewById<Button>(R.id.button4).setOnClickListener { addExpresion("4") }
+        view.findViewById<Button>(R.id.button5).setOnClickListener { addExpresion("5") }
+        view.findViewById<Button>(R.id.button6).setOnClickListener { addExpresion("6") }
+        view.findViewById<Button>(R.id.button7).setOnClickListener { addExpresion("7") }
+        view.findViewById<Button>(R.id.button8).setOnClickListener { addExpresion("8") }
+        view.findViewById<Button>(R.id.button9).setOnClickListener { addExpresion("9") }
+        view.findViewById<Button>(R.id.button0).setOnClickListener { addExpresion("0") }
+        view.findViewById<Button>(R.id.buttonpoint).setOnClickListener { addExpresion(".") }
+
         return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Calculadora.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Calculadora().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    fun sum() {
+        limpiarError()
+        pantalla.text = pantalla.text.toString() + "+"
+    }
+
+    fun sub() {
+        limpiarError()
+        pantalla.text = pantalla.text.toString() + "-"
+    }
+
+    fun div() {
+        limpiarError()
+        pantalla.text = pantalla.text.toString() + "/"
+    }
+
+    fun mult() {
+        limpiarError()
+        pantalla.text = pantalla.text.toString() + "*"
+    }
+
+
+    fun addExpresion(value: String) {
+        limpiarError()
+        pantalla.append(value)
+    }
+
+    fun calculate() {
+
+        val currentCalculation = pantalla.text.toString()
+        val regex = Regex("""^\d+(\.\d+)?([+\-*/]\d+(\.\d+)?)*$""")
+
+        if (!regex.matches(currentCalculation)) {
+            pantalla.text = "ERROR: Invalid operation"
+            return
+        }
+
+        val tokenRegex = Regex("""(\d+(\.\d+)?)|[+\-*/]""")
+        val tokens = tokenRegex.findAll(currentCalculation)
+            .map { it.value }
+            .toMutableList()
+
+        var i = 0
+        while (i < tokens.size) {
+            if (tokens[i] == "*" || tokens[i] == "/") {
+                val left = tokens[i - 1].toDouble()
+                val right = tokens[i + 1].toDouble()
+
+                val result =
+                    if (tokens[i] == "*") left * right
+                    else left / right
+
+                tokens[i - 1] = result.toString()
+                tokens.removeAt(i)
+                tokens.removeAt(i)
+                i = 0
+            } else i++
+        }
+
+        var result = tokens[0].toDouble()
+        i = 1
+
+        while (i < tokens.size) {
+            val op = tokens[i]
+            val value = tokens[i + 1].toDouble()
+
+            result = if (op == "+") result + value else result - value
+            i += 2
+        }
+
+        pantalla.text = result.toString()
+    }
+
+    private fun limpiarError() {
+        if (pantalla.text.toString() == "ERROR: Invalid operation") {
+            pantalla.text = ""
+        }
     }
 }
