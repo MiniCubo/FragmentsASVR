@@ -20,10 +20,16 @@ import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var qrResult : String
+    private var onQrResult: ((String) -> Unit)? = null
     private val barcodeLauncher = registerForActivityResult<ScanOptions?, ScanIntentResult?>(
         ScanContract(), { result: ScanIntentResult? ->
             if(result!!.contents == null) Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
-            else Toast.makeText(this, "Scanned ${result.contents}", Toast.LENGTH_SHORT).show()
+            else {
+                Toast.makeText(this, "Scanned ${result.contents}", Toast.LENGTH_SHORT).show()
+                qrResult = result.contents
+                onQrResult?.invoke(qrResult)  // ✅ Call callback HERE, after result arrives
+            }
         }
     )
 
@@ -77,8 +83,9 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "mensaje desde la actividad main", Toast.LENGTH_SHORT).show()
     }
 
-    fun leerQR(){
+    fun leerQR(onResult: (String) -> Unit){
         val options = ScanOptions()
+        onQrResult = onResult
         options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
         options.setPrompt("Scan a QR CODE")
         options.setCameraId(0)

@@ -42,8 +42,9 @@ class Inicio : Fragment() {
             (activity as MainActivity).mensaje()
         }
         val qr = view.findViewById<Button>(R.id.qr)
+        val qrText = view.findViewById<TextView>(R.id.qr_text)
         qr.setOnClickListener {
-            (activity as MainActivity).leerQR()
+            (activity as MainActivity).leerQR{result -> qrText.text = result}
         }
         val gps = view.findViewById<Button>(R.id.gps)
         val ubicacion = view.findViewById<TextView>(R.id.gps_text)
